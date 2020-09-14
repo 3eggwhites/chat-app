@@ -18,15 +18,13 @@ app.use('/', (req,res) => {
     res.render('index');
 });
 
-let messageData = 'Welcome!'
 io.on('connection', (socket) => { // socket is an object which has information about new connections
     console.log('New Websocket connection');
     
-    socket.emit('message', messageData); // to send information to a single connection
+    socket.emit('message', 'Welcome!'); // to send information to a single connection
 
     socket.on('sendMessage', (message) => {
-        messageData = message;
-        io.emit('message', messageData);
+        io.emit('message', message);
     });
 
 });
