@@ -1,17 +1,36 @@
 const express = require('express');
+const http = require('http');
 const path = require('path');
+const socketIO = require('socket.io');
 
 const port = process.env.PORT;
 
 const app = express();
+// creating server outside the express library.
+const server = http.createServer(app);
+// creating a websocket server by passing the explicitly created serevr
+const io = socketIO(server);
 
 const publicDirectoryPath = path.join(__dirname, '../public');
 app.use(express.static(publicDirectoryPath));
 
-app.use('/', async (req,res) => {
+app.use('/', (req,res) => {
     res.render('index');
 });
 
-app.listen(port, () => {
+let messageData = 'Welcome!'
+io.on('connection', (socket) => { // socket is an object which has information about new connections
+    console.log('New Websocket connection');
+    
+    socket.emit('message', messageData); // to send information to a single connection
+
+    socket.on('sendMessage', (message) => {
+        messageData = message;
+        io.emit('message', messageData);
+    });
+
+});
+
+server.listen(port, () => {
     console.log(`App is up on port ${port}`);
 });
