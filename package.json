@@ -1,7 +1,7 @@
 {
   "name": "chat-app",
   "version": "1.0.0",
-  "description": "",
+  "description": "Chat Application built with node.js",
   "main": "index.js",
   "scripts": {
     "dev": "env-cmd -f ./env/local.env nodemon src/server.js -e js"
@@ -15,5 +15,13 @@
   "devDependencies": {
     "env-cmd": "^10.1.0",
     "nodemon": "^2.0.4"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/not-john-wick/chat-app.git"
+  },
+  "bugs": {
+    "url": "https://github.com/not-john-wick/chat-app/issues"
+  },
+  "homepage": "https://github.com/not-john-wick/chat-app#readme"
 }
