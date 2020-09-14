@@ -4,6 +4,7 @@
   "description": "Chat Application built with node.js",
   "main": "index.js",
   "scripts": {
+    "start": "node src/server.js",
     "dev": "env-cmd -f ./.env/local.env nodemon src/server.js -e js"
   },
   "keywords": [],
