@@ -2,6 +2,7 @@ const express = require('express');
 const http = require('http');
 const path = require('path');
 const socketIO = require('socket.io');
+const Filter = require('bad-words');
 
 const port = process.env.PORT;
 
@@ -26,12 +27,22 @@ io.on('connection', (socket) => { // socket is an object which has information a
 
     socket.broadcast.emit('message', 'A new user has joined');
 
-    socket.on('sendMessage', (message) => {
+    socket.on('sendMessage', (message, acknowledge) => { 
+        // the acknowledge callback function is the final argument to acknowledge a message has been received by the server
+
+        const filter = new Filter();
+
+        if(filter.isProfane(message)) {
+            return acknowledge('Profanity is not allowed');
+        }
+
         io.emit('message', message);
+        acknowledge();
     });
 
-    socket.on('sendLocation', (location) => {
-        io.emit('message', `https://www.google.com/maps?q=${location.latitude},${location.longitude}`);
+    socket.on('sendLocation', (location, acknowledge) => {
+        io.emit('locationMessage', `https://www.google.com/maps?q=${location.latitude},${location.longitude}`);
+        acknowledge();
     });
 
     socket.on('disconnect', () => {
