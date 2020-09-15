@@ -4,6 +4,8 @@ const path = require('path');
 const socketIO = require('socket.io');
 const Filter = require('bad-words');
 
+const { generateMessage, generateLocationMessage } = require('./utils/messages');
+
 const port = process.env.PORT;
 
 const app = express();
@@ -23,11 +25,11 @@ app.use('/', (req,res) => {
 io.on('connection', (socket) => { // socket is an object which has information about new connections
     console.log('New Websocket connection');
     
-    socket.emit('message', 'Welcome!'); // to send information to a single connection
+    socket.emit('message', generateMessage('Welcome!')); // to send information to a single connection
 
-    socket.broadcast.emit('message', 'A new user has joined');
+    socket.broadcast.emit('message', generateMessage('A new user has joined'));
 
-    socket.on('sendMessage', (message, acknowledge) => { 
+    socket.on('sendMessage', (message, acknowledge) => {
         // the acknowledge callback function is the final argument to acknowledge a message has been received by the server
 
         const filter = new Filter();
@@ -36,17 +38,18 @@ io.on('connection', (socket) => { // socket is an object which has information a
             return acknowledge('Profanity is not allowed');
         }
 
-        io.emit('message', message);
+        io.emit('message', generateMessage(message));
         acknowledge();
     });
 
     socket.on('sendLocation', (location, acknowledge) => {
-        io.emit('locationMessage', `https://www.google.com/maps?q=${location.latitude},${location.longitude}`);
+        io.emit('locationMessage', generateLocationMessage(
+            `https://www.google.com/maps?q=${location.latitude},${location.longitude}`));
         acknowledge();
     });
 
     socket.on('disconnect', () => {
-        io.emit('message', 'A user has left');
+        io.emit('message', generateMessage('A user has left'));
     });
 
 });
