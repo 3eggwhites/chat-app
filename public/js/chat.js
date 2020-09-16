@@ -1,22 +1,27 @@
 const clientSocket = io();
 
 // Elements
-const $messageForm = document.querySelector('#messageForm');
+const $messageForm = document.querySelector('#message-form');
 const $messageFormInput = $messageForm.querySelector('input');
 const $messageFormButton = $messageForm.querySelector('button');
-const $sendLocationButton = document.querySelector('#sendLocation');
+const $sendLocationButton = document.querySelector('#send-location');
 const $messages = document.querySelector('#messages');
 
 // Templates
 const messageTemplate = document.querySelector('#message-template').innerHTML;
-const locationTemplate = document.querySelector('#location-template').innerHTML;
+const locationTemplate = document.querySelector('#location-message-template').innerHTML;
+const sidebarTemplate = document.querySelector('#sidebar-template').innerHTML;
+
+//Options
+const { userName, room } = Qs.parse(location.search, { ignoreQueryPrefix: true });
 
 // Event handlers
 clientSocket.on('message', (messageData) => {
 
     const html = Mustache.render(messageTemplate, {
         messageData: messageData.text,
-        createdAt: moment(messageData.createdAt).format('h:mm a')
+        createdAt: moment(messageData.createdAt).format('h:mm a'),
+        userName: messageData.userName
     });
     $messages.insertAdjacentHTML("beforeend", html);
 });
@@ -24,10 +29,19 @@ clientSocket.on('message', (messageData) => {
 clientSocket.on('locationMessage', (location) => {
     const html = Mustache.render(locationTemplate, {
         locationUrl: location.locationUrl,
-        createdAt: moment(location.createdAt).format('h:mm a')
+        createdAt: moment(location.createdAt).format('h:mm a'),
+        userName: location.userName
     });
 
     $messages.insertAdjacentHTML("beforeend", html);
+});
+
+clientSocket.on('roomData', ({ room, users }) => {
+    const html = Mustache.render(sidebarTemplate,{
+        room,
+        users
+    });
+    document.querySelector('#sidebar').innerHTML = html;
 });
 
 $messageForm.addEventListener('submit', (evt) => {
@@ -68,4 +82,11 @@ $sendLocationButton.addEventListener('click', () => {
             $sendLocationButton.removeAttribute('disabled');
         });
     });
+});
+
+clientSocket.emit('join', { userName, room }, (error) => {
+    if (error) {
+        alert(error);
+        location.href='/';
+    }
 });
